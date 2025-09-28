@@ -231,9 +231,19 @@ int main() {
         return -1;
     }
     
-    // Set camera position
+    // Set camera position and mode
     camera->SetPosition(glm::vec3(0.0f, 2.0f, 5.0f));
     camera->SetTarget(glm::vec3(0.0f, 0.0f, 0.0f));
+    camera->SetMode(CameraMode::FIRST_PERSON);
+    
+    // Set up third-person settings
+    camera->SetThirdPersonDistance(6.0f);
+    camera->SetThirdPersonHeight(2.0f);
+    camera->SetThirdPersonOffset(glm::vec3(0.0f, 0.0f, 0.0f));
+    
+    // Set up first-person settings
+    camera->SetFirstPersonHeight(1.6f);
+    camera->SetFirstPersonOffset(glm::vec3(0.0f, 0.0f, 0.0f));
     
     // Create shaders
     auto gbufferShader = renderer->CreateShader(
@@ -279,6 +289,10 @@ int main() {
     
     // Main loop
     std::cout << "Starting main loop..." << std::endl;
+    std::cout << "Controls:" << std::endl;
+    std::cout << "  V - Toggle between First Person and Third Person camera" << std::endl;
+    std::cout << "  ESC - Exit" << std::endl;
+    std::cout << "  Mouse - Look around" << std::endl;
     
     while (engine.GetWindow() && !glfwWindowShouldClose(engine.GetWindow())) {
         float deltaTime = engine.GetDeltaTime();
@@ -290,6 +304,31 @@ int main() {
         scene.cubeModel = glm::translate(scene.cubeModel, glm::vec3(0.0f, 1.0f, 0.0f));
         scene.cubeModel = glm::rotate(scene.cubeModel, glm::radians(scene.rotation), glm::vec3(0.0f, 1.0f, 0.0f));
         scene.cubeModel = glm::scale(scene.cubeModel, glm::vec3(1.0f, 1.0f, 1.0f));
+        
+        // Simulate player movement (in a real game, this would come from input)
+        glm::vec3 playerPos = glm::vec3(sin(scene.time * 0.5f) * 3.0f, 1.0f, cos(scene.time * 0.3f) * 3.0f);
+        glm::quat playerRot = glm::angleAxis(scene.time * 0.2f, glm::vec3(0, 1, 0));
+        
+        // Handle input for camera toggle (V key)
+        static bool vKeyPressed = false;
+        if (glfwGetKey(engine.GetWindow(), 86) == GLFW_PRESS && !vKeyPressed) {
+            CameraMode newMode = (camera->GetMode() == CameraMode::FIRST_PERSON) 
+                ? CameraMode::THIRD_PERSON 
+                : CameraMode::FIRST_PERSON;
+            camera->SetMode(newMode);
+            vKeyPressed = true;
+            std::cout << "Camera mode: " << (newMode == CameraMode::FIRST_PERSON ? "First Person" : "Third Person") << std::endl;
+        }
+        if (glfwGetKey(engine.GetWindow(), 86) == GLFW_RELEASE) {
+            vKeyPressed = false;
+        }
+        
+        // Update camera based on mode
+        if (camera->GetMode() == CameraMode::FIRST_PERSON) {
+            camera->UpdateFirstPerson(playerPos, playerRot);
+        } else {
+            camera->UpdateThirdPerson(playerPos, playerRot);
+        }
         
         // Update camera
         camera->Update(deltaTime);
@@ -352,7 +391,17 @@ int main() {
         gbufferShader->SetInt("uAOMap", 4);
         
         // Render solid objects to G-buffer (player cube, pickups, etc.)
-        deferredRenderer->RenderGBuffer(scene.cube, scene.cubeModel);
+        // Update player cube position
+        scene.cubeModel = glm::mat4(1.0f);
+        scene.cubeModel = glm::translate(scene.cubeModel, playerPos);
+        scene.cubeModel = glm::rotate(scene.cubeModel, glm::angle(playerRot), glm::axis(playerRot));
+        scene.cubeModel = glm::scale(scene.cubeModel, glm::vec3(0.8f, 1.6f, 0.8f)); // Player-sized cube
+        
+        // Only render player model in third-person mode
+        if (camera->GetMode() == CameraMode::THIRD_PERSON) {
+            deferredRenderer->RenderGBuffer(scene.cube, scene.cubeModel);
+        }
+        
         deferredRenderer->RenderGBuffer(scene.plane, scene.planeModel);
         
         deferredRenderer->EndGBuffer();

@@ -36,6 +36,7 @@ set(SOURCES
     src/XQZRenderer.cpp
     src/MapGenerator.cpp
     src/SnapshotSystem.cpp
+    src/Camera.cpp
 )
 
 # Create executable
