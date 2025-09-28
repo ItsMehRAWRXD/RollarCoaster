@@ -1,5 +1,8 @@
 #include "Engine.h"
 #include "DeferredRenderer.h"
+#include "XQZRenderer.h"
+#include "MapGenerator.h"
+#include "SnapshotSystem.h"
 #include "Mesh.h"
 #include "Camera.h"
 #include <iostream>
@@ -10,15 +13,21 @@ struct DemoScene {
     std::shared_ptr<Mesh> cube;
     std::shared_ptr<Mesh> sphere;
     std::shared_ptr<Mesh> plane;
+    std::shared_ptr<Mesh> wallMesh;
     
     // Transform matrices
     glm::mat4 cubeModel;
     glm::mat4 sphereModel;
     glm::mat4 planeModel;
+    std::vector<glm::mat4> wallModels;
     
     // Animation
     float rotation = 0.0f;
     float time = 0.0f;
+    
+    // Map data
+    Map currentMap;
+    int mapSeed = 1337;
 };
 
 // Create demo scene
@@ -92,6 +101,59 @@ DemoScene CreateDemoScene(std::shared_ptr<Renderer> renderer) {
     std::vector<unsigned int> planeIndices = { 0, 1, 2, 3, 4, 5 };
     scene.plane = renderer->CreateMesh(planeVertices, planeIndices);
     
+    // Create wall mesh (simple cube)
+    std::vector<float> wallVertices = {
+        // positions          // normals           // texture coords
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+        
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
+        
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+        
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+        
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+        
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
+    };
+    
+    std::vector<unsigned int> wallIndices;
+    for (unsigned int i = 0; i < 36; i++) {
+        wallIndices.push_back(i);
+    }
+    
+    scene.wallMesh = renderer->CreateMesh(wallVertices, wallIndices);
+    
     // Initialize transform matrices
     scene.cubeModel = glm::mat4(1.0f);
     scene.sphereModel = glm::mat4(1.0f);
@@ -126,6 +188,38 @@ int main() {
         std::cerr << "Failed to initialize deferred renderer!" << std::endl;
         return -1;
     }
+    
+    // Create XQZ renderer
+    auto xqzRenderer = std::make_shared<XQZRenderer>();
+    if (!xqzRenderer->Initialize()) {
+        std::cerr << "Failed to initialize XQZ renderer!" << std::endl;
+        return -1;
+    }
+    
+    // Generate procedural map
+    std::cout << "Generating procedural map..." << std::endl;
+    scene.currentMap = MapGenerator::GenerateArena(scene.mapSeed, 50);
+    std::cout << "Generated map with " << scene.currentMap.walls.size() << " walls and " 
+              << scene.currentMap.spawns.size() << " spawns" << std::endl;
+    
+    // Create wall models from map
+    scene.wallModels.clear();
+    for (const auto& wall : scene.currentMap.walls) {
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, wall.position);
+        model = glm::rotate(model, glm::radians(wall.rotation.y), glm::vec3(0, 1, 0));
+        model = glm::scale(model, wall.size);
+        scene.wallModels.push_back(model);
+    }
+    
+    // Create network prediction systems
+    SnapshotBuffer snapshotBuffer;
+    NetworkPrediction networkPrediction;
+    PingCompensation pingCompensation;
+    MuzzleCorrection muzzleCorrection;
+    
+    // Set up muzzle offset
+    muzzleCorrection.SetMuzzleOffset(glm::vec3(0.3f, 0.0f, 0.0f));
     
     // Create demo scene
     DemoScene scene = CreateDemoScene(renderer);
@@ -209,7 +303,26 @@ int main() {
         // Begin frame
         renderer->BeginFrame();
         
-        // G-buffer pass
+        // XQZ Wireframe Pass - Render map as translucent neon walls
+        xqzRenderer->BeginXQZPass();
+        
+        // Set camera uniforms for XQZ shader
+        auto wireframeShader = xqzRenderer->GetWireframeShader();
+        if (wireframeShader) {
+            wireframeShader->Use();
+            wireframeShader->SetMat4("uView", view);
+            wireframeShader->SetMat4("uProj", proj);
+            wireframeShader->SetVec4("uColor", glm::vec4(0.0f, 1.0f, 0.0f, 0.3f)); // Neon green
+        }
+        
+        // Render all walls as wireframe
+        for (size_t i = 0; i < scene.wallModels.size(); i++) {
+            xqzRenderer->RenderWireframe(scene.wallMesh, scene.wallModels[i]);
+        }
+        
+        xqzRenderer->EndXQZPass();
+        
+        // G-buffer pass for solid objects
         deferredRenderer->BeginGBuffer();
         gbufferShader->Use();
         
@@ -238,7 +351,7 @@ int main() {
         gbufferShader->SetInt("uRoughnessMap", 3);
         gbufferShader->SetInt("uAOMap", 4);
         
-        // Render scene to G-buffer
+        // Render solid objects to G-buffer (player cube, pickups, etc.)
         deferredRenderer->RenderGBuffer(scene.cube, scene.cubeModel);
         deferredRenderer->RenderGBuffer(scene.plane, scene.planeModel);
         

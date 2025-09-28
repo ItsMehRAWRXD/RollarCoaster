@@ -32,10 +32,10 @@ set(SOURCES
     src/Shader.cpp
     src/Texture.cpp
     src/Mesh.cpp
-    src/Camera.cpp
-    src/Lighting.cpp
-    src/PostFX.cpp
-    src/AssetLoader.cpp
+    src/DeferredRenderer.cpp
+    src/XQZRenderer.cpp
+    src/MapGenerator.cpp
+    src/SnapshotSystem.cpp
 )
 
 # Create executable
