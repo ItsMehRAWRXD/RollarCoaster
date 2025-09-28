@@ -1,0 +1,482 @@
+# Path of Exile-style League Configuration
+# "Meteor Mayhem" - A high-intensity league with comet impacts and lava hazards
+
+league:
+  name: "Meteor Mayhem"
+  description: "Comets rain from the sky, creating lava pools and chaos across the wasteland"
+  minLevel: 5
+  maxLevel: 100
+  difficulty: 1.5
+  duration: 604800  # 1 week in seconds
+  rewardType: "loot"
+  globalModifiers:
+    LavaDamage: 2.0
+    CometDamage: 1.5
+    LootDropRate: 1.8
+    ExperienceGain: 1.3
+    MovementSpeed: 0.8  # Slower movement due to heat
+  specialMechanics:
+    - "MeteorRain"
+    - "LavaFlood"
+    - "HeatWave"
+    - "AshStorm"
+
+zones:
+  - biome: "hell"
+    layout: "Hell City"
+    zoneLevel: 15
+    lootBonus: 2.0
+    experienceBonus: 1.5
+    modifiers:
+      FireResistance: -0.5  # -50% fire resistance
+      LavaDamage: 3.0
+      CometFrequency: 2.0
+    hazards:
+      - type: "Lava Flood"
+        intensity: 1.5
+        frequency: 0.1
+        damage: 25.0
+      - type: "Meteor Rain"
+        intensity: 2.0
+        frequency: 0.05
+        damage: 50.0
+    boss:
+      name: "Comet Lord"
+      level: 20
+      health: 1000
+      abilities:
+        - "Meteor Strike"
+        - "Lava Wave"
+        - "Heat Aura"
+      phases: 3
+      loot:
+        - "Hellstone Ore"
+        - "Comet Fragment"
+        - "Lava Forged Sword"
+    oreNodes:
+      - type: "Hellstone"
+        count: 15
+        richness: 75
+        respawnTime: 300
+      - type: "Soulstone"
+        count: 5
+        richness: 50
+        respawnTime: 600
+    lootChests:
+      - type: "rare"
+        count: 10
+        respawnTime: 1800
+        contents:
+          - "Fire Resistant Armor"
+          - "Lava Boots"
+          - "Comet Shard"
+      - type: "unique"
+        count: 3
+        respawnTime: 3600
+        contents:
+          - "Meteor Hammer"
+          - "Hellfire Rifle"
+          - "Ash Cloak"
+
+  - biome: "wasteland"
+    layout: "Burned Suburbs"
+    zoneLevel: 12
+    lootBonus: 1.8
+    experienceBonus: 1.2
+    modifiers:
+      RadiationResistance: -0.3
+      HeatDamage: 1.5
+      AshVisibility: 0.7
+    hazards:
+      - type: "Fire Tornado"
+        intensity: 1.2
+        frequency: 0.08
+        damage: 30.0
+      - type: "Ash Storm"
+        intensity: 1.0
+        frequency: 0.15
+        damage: 10.0
+    boss:
+      name: "Ash Hag"
+      level: 18
+      health: 800
+      abilities:
+        - "Ash Cloud"
+        - "Fire Tornado"
+        - "Heat Wave"
+      phases: 2
+      loot:
+        - "Ash Ore"
+        - "Fire Resistant Cloth"
+        - "Tornado Staff"
+    oreNodes:
+      - type: "Iron"
+        count: 20
+        richness: 100
+        respawnTime: 240
+      - type: "Scrap"
+        count: 30
+        richness: 80
+        respawnTime: 180
+    lootChests:
+      - type: "normal"
+        count: 25
+        respawnTime: 900
+        contents:
+          - "Scrap Metal"
+          - "Burnt Cloth"
+          - "Ash Pile"
+      - type: "rare"
+        count: 8
+        respawnTime: 1800
+        contents:
+          - "Fireproof Jacket"
+          - "Ash Mask"
+          - "Tornado Boots"
+
+  - biome: "city"
+    layout: "Molten Downtown"
+    zoneLevel: 18
+    lootBonus: 2.2
+    experienceBonus: 1.6
+    modifiers:
+      BuildingCollapse: 0.3
+      LavaFlow: 2.0
+      HeatReflection: 1.5
+    hazards:
+      - type: "Building Collapse"
+        intensity: 1.0
+        frequency: 0.12
+        damage: 40.0
+      - type: "Lava Flow"
+        intensity: 1.8
+        frequency: 0.06
+        damage: 35.0
+    boss:
+      name: "Molten Golem"
+      level: 25
+      health: 1500
+      abilities:
+        - "Lava Slam"
+        - "Heat Burst"
+        - "Building Throw"
+      phases: 4
+      loot:
+        - "Molten Core"
+        - "Lava Forged Armor"
+        - "Heat Resistant Helmet"
+    oreNodes:
+      - type: "Steel"
+        count: 12
+        richness: 90
+        respawnTime: 360
+      - type: "Copper"
+        count: 18
+        richness: 70
+        respawnTime: 300
+    lootChests:
+      - type: "unique"
+        count: 5
+        respawnTime: 3600
+        contents:
+          - "Molten Sword"
+          - "Heat Shield"
+          - "Lava Boots"
+      - type: "legendary"
+        count: 2
+        respawnTime: 7200
+        contents:
+          - "Comet Hammer"
+          - "Hellfire Armor"
+          - "Meteor Staff"
+
+# Skill Tree Configuration
+skillTree:
+  nodes:
+    - id: "fire_resistance"
+      name: "Fire Resistance"
+      description: "Increases fire resistance by 25%"
+      cost: 1
+      levelRequirement: 5
+      bonuses:
+        FireResistance: 0.25
+      connections: ["heat_immunity"]
+    
+    - id: "heat_immunity"
+      name: "Heat Immunity"
+      description: "Immune to heat damage"
+      cost: 2
+      levelRequirement: 10
+      isKeystone: true
+      bonuses:
+        HeatImmunity: 1.0
+      connections: ["fire_resistance", "lava_walker"]
+    
+    - id: "lava_walker"
+      name: "Lava Walker"
+      description: "Can walk on lava without damage"
+      cost: 3
+      levelRequirement: 15
+      isKeystone: true
+      bonuses:
+        LavaWalk: 1.0
+      connections: ["heat_immunity", "meteor_caller"]
+    
+    - id: "meteor_caller"
+      name: "Meteor Caller"
+      description: "Can call down meteors as an ability"
+      cost: 4
+      levelRequirement: 20
+      isKeystone: true
+      bonuses:
+        MeteorCall: 1.0
+      connections: ["lava_walker"]
+
+# Currency Configuration
+currency:
+  - name: "Orb of Transmutation"
+    description: "Upgrades a normal item to magic"
+    effect: "transmute"
+    rarity: "common"
+    value: 1
+  
+  - name: "Orb of Augmentation"
+    description: "Adds a random affix to a magic item"
+    effect: "augment"
+    rarity: "common"
+    value: 1
+  
+  - name: "Orb of Alteration"
+    description: "Rerolls all affixes on a magic item"
+    effect: "alter"
+    rarity: "uncommon"
+    value: 3
+  
+  - name: "Orb of Fusing"
+    description: "Adds sockets to an item"
+    effect: "fuse"
+    rarity: "uncommon"
+    value: 2
+  
+  - name: "Orb of Chaos"
+    description: "Rerolls all affixes on a rare item"
+    effect: "chaos"
+    rarity: "rare"
+    value: 5
+  
+  - name: "Exalted Orb"
+    description: "Adds a random affix to a rare item"
+    effect: "exalt"
+    rarity: "legendary"
+    value: 20
+  
+  - name: "Divine Orb"
+    description: "Rerolls all affix values on an item"
+    effect: "divine"
+    rarity: "mythic"
+    value: 50
+
+# Item Database
+items:
+  - baseType: "Pistol"
+    rarity: 0
+    itemLevel: 1
+    affixes: {}
+    flavorText: "A basic firearm for self-defense"
+  
+  - baseType: "Lava Forged Sword"
+    rarity: 3
+    itemLevel: 20
+    affixes:
+      FireDamage: 50.0
+      HeatResistance: 25.0
+    flavorText: "Forged in the depths of hell, this blade burns with eternal fire"
+  
+  - baseType: "Comet Hammer"
+    rarity: 4
+    itemLevel: 25
+    affixes:
+      MeteorDamage: 100.0
+      CometCall: 1.0
+      FireDamage: 75.0
+    flavorText: "A hammer forged from a fallen comet, capable of calling down meteors"
+  
+  - baseType: "Hellfire Rifle"
+    rarity: 3
+    itemLevel: 18
+    affixes:
+      FireDamage: 40.0
+      HeatDamage: 30.0
+      LavaResistance: 20.0
+    flavorText: "A rifle that fires bullets of pure hellfire"
+  
+  - baseType: "Ash Cloak"
+    rarity: 3
+    itemLevel: 15
+    affixes:
+      FireResistance: 40.0
+      AshImmunity: 1.0
+      Stealth: 15.0
+    flavorText: "A cloak woven from the ashes of the burned world"
+
+# Ore Configuration
+ore:
+  - type: "Hellstone"
+    biome: "hell"
+    richness: 75
+    minLevel: 10
+    respawnTime: 300
+    specialDrops:
+      - "Soulstone"
+      - "Infernal Iron"
+    rarity: 0.3
+  
+  - type: "Soulstone"
+    biome: "hell"
+    richness: 50
+    minLevel: 15
+    respawnTime: 600
+    specialDrops:
+      - "Demon Essence"
+      - "Hellfire Crystal"
+    rarity: 0.1
+  
+  - type: "Comet Fragment"
+    biome: "hell"
+    richness: 25
+    minLevel: 20
+    respawnTime: 1200
+    specialDrops:
+      - "Meteor Core"
+      - "Star Dust"
+    rarity: 0.05
+  
+  - type: "Ash Ore"
+    biome: "wasteland"
+    richness: 60
+    minLevel: 8
+    respawnTime: 240
+    specialDrops:
+      - "Burnt Metal"
+      - "Ash Crystal"
+    rarity: 0.4
+  
+  - type: "Molten Core"
+    biome: "city"
+    richness: 40
+    minLevel: 18
+    respawnTime: 480
+    specialDrops:
+      - "Lava Forged Steel"
+      - "Heat Resistant Alloy"
+    rarity: 0.2
+
+# Quest Configuration (Minimal Lore)
+quests:
+  - id: "survive_meteor_storm"
+    title: "Survive the Meteor Storm"
+    description: "Survive 5 meteor impacts without dying"
+    type: "survival"
+    level: 10
+    objectives:
+      - "Survive 5 meteor impacts"
+      - "Don't die for 10 minutes"
+    rewards:
+      - "Fire Resistance Potion"
+      - "Meteor Shard"
+      - "Experience: 500"
+  
+  - id: "mine_hellstone"
+    title: "Mine Hellstone"
+    description: "Mine 100 units of Hellstone ore"
+    type: "gathering"
+    level: 12
+    objectives:
+      - "Mine 100 Hellstone ore"
+    rewards:
+      - "Hellstone Pickaxe"
+      - "Fire Resistance Gear"
+      - "Experience: 750"
+  
+  - id: "defeat_comet_lord"
+    title: "Defeat the Comet Lord"
+    description: "Defeat the Comet Lord boss"
+    type: "boss"
+    level: 20
+    objectives:
+      - "Defeat Comet Lord"
+    rewards:
+      - "Comet Hammer"
+      - "Hellfire Armor"
+      - "Experience: 2000"
+      - "League Points: 100"
+
+# League Events
+events:
+  - name: "Meteor Shower"
+    description: "Meteors rain down across all zones"
+    frequency: 0.1  # 10% chance per minute
+    duration: 300   # 5 minutes
+    effects:
+      - "MeteorDamage: 2.0"
+      - "LootDropRate: 1.5"
+      - "ExperienceGain: 1.2"
+  
+  - name: "Lava Flood"
+    description: "Lava floods low-lying areas"
+    frequency: 0.05  # 5% chance per minute
+    duration: 600    # 10 minutes
+    effects:
+      - "LavaDamage: 3.0"
+      - "MovementSpeed: 0.5"
+      - "FireResistance: -0.5"
+  
+  - name: "Heat Wave"
+    description: "Extreme heat affects all players"
+    frequency: 0.08  # 8% chance per minute
+    duration: 180    # 3 minutes
+    effects:
+      - "HeatDamage: 1.5"
+      - "StaminaDrain: 2.0"
+      - "WaterConsumption: 3.0"
+
+# Leaderboard Configuration
+leaderboard:
+  categories:
+    - name: "Most Kills"
+      type: "kills"
+      reward: "Comet Crown"
+    
+    - name: "Most Ore Mined"
+      type: "ore_mined"
+      reward: "Mining Master Badge"
+    
+    - name: "Longest Survival"
+      type: "survival_time"
+      reward: "Survivor's Cloak"
+    
+    - name: "Boss Defeats"
+      type: "boss_kills"
+      reward: "Boss Slayer Title"
+  
+  rewards:
+    - rank: 1
+      title: "Meteor Master"
+      items:
+        - "Legendary Comet Hammer"
+        - "Meteor Crown"
+        - "League Champion Badge"
+    
+    - rank: 2
+      title: "Ash Warrior"
+      items:
+        - "Rare Lava Sword"
+        - "Fire Resistant Armor"
+        - "League Runner-up Badge"
+    
+    - rank: 3
+      title: "Heat Survivor"
+      items:
+        - "Magic Fire Rifle"
+        - "Heat Resistant Boots"
+        - "League Third Place Badge"
