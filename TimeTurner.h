@@ -8,7 +8,8 @@ enum class Era {
     MODERN,      // Contemporary settings (GTA, CoD, MoH)
     WASTELAND,   // Post-apocalyptic (Fallout)
     FRONTIER,    // 1500s-1800s frontier (RDR, Westworld)
-    WESTWORLD    // Meta-simulation layer with mixed eras
+    WESTWORLD,   // Meta-simulation layer with mixed eras
+    MEDIEVAL     // Medieval fantasy (castles, knights, feudal systems)
 };
 
 // Hazard overlays - environmental threats that can be applied to any era
@@ -17,7 +18,8 @@ enum class Hazard {
     NUCLEAR_FALLOUT, // Radiation storms, mutants, irradiated zones
     WARZONE,        // Active combat zones, airstrikes, military presence
     STORM,          // Weather hazards (sandstorms, blizzards)
-    PLAGUE          // Disease outbreaks, contaminated areas
+    PLAGUE,         // Disease outbreaks, contaminated areas
+    DEMONIC_CORRUPTION // Diablo-style demonic invasion, Lilith's influence
 };
 
 // Core world configuration structure
